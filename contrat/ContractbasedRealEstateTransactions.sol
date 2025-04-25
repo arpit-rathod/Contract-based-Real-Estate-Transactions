@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-/// @title RealEstate - A simple marketplace for listing and buying properties
+/// @title RealEstate - A simple marketplace for listing and buying properties using Ethereum
 contract RealEstate {
     address public owner;
 
@@ -51,7 +51,6 @@ contract RealEstate {
     }
 
     /// @notice View details of a specific property
-    /// @param _propertyId The ID of the property to view
     function getProperty(uint _propertyId) public view returns (
         uint id,
         address seller,
@@ -63,8 +62,7 @@ contract RealEstate {
         return (p.id, p.seller, p.buyer, p.price, p.isSold);
     }
 
-    /// @notice Cancel a property listing (only by the seller)
-    /// @param _propertyId The ID of the property to cancel
+    /// @notice Cancel a property listing (only the original seller can cancel)
     function cancelListing(uint _propertyId) public {
         Property storage property = properties[_propertyId];
         require(property.seller == msg.sender, "Only the seller can cancel this listing");
@@ -73,8 +71,7 @@ contract RealEstate {
         delete properties[_propertyId];
     }
 
-    /// @notice Get all currently unsold properties
-    /// @return An array of property IDs that are still for sale
+    /// @notice Get IDs of all unsold properties
     function getUnsoldPropertyIds() public view returns (uint[] memory) {
         uint[] memory temp = new uint[](nextPropertyId);
         uint count = 0;
@@ -94,9 +91,7 @@ contract RealEstate {
         return unsold;
     }
 
-    /// @notice Get all properties listed by a specific seller
-    /// @param _seller The address of the seller
-    /// @return An array of property IDs listed by the given seller
+    /// @notice Get all property IDs listed by a specific seller
     function getPropertiesBySeller(address _seller) public view returns (uint[] memory) {
         uint[] memory temp = new uint[](nextPropertyId);
         uint count = 0;
