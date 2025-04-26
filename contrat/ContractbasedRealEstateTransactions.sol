@@ -22,7 +22,6 @@ contract RealEstate {
     }
 
     /// @notice List a new property for sale
-    /// @param _price The price of the property in wei
     function listProperty(uint _price) public {
         require(_price > 0, "Price must be greater than zero");
 
@@ -38,7 +37,6 @@ contract RealEstate {
     }
 
     /// @notice Purchase a listed property
-    /// @param _propertyId The ID of the property to buy
     function buyProperty(uint _propertyId) public payable {
         Property storage property = properties[_propertyId];
 
@@ -110,4 +108,41 @@ contract RealEstate {
 
         return sellerProperties;
     }
+
+    // ---------------------------------------------------------
+    // 🔥 Added 5 Human-written useful functions below
+    // ---------------------------------------------------------
+
+    /// @notice Check if a property is available for purchase
+    function isAvailable(uint _propertyId) public view returns (bool) {
+        Property memory property = properties[_propertyId];
+        return !property.isSold && property.price > 0;
+    }
+
+    /// @notice Get the total number of properties listed
+    function getTotalProperties() public view returns (uint) {
+        return nextPropertyId - 1;
+    }
+
+    /// @notice Get the owner (seller) address of a property
+    function getSellerOfProperty(uint _propertyId) public view returns (address) {
+        return properties[_propertyId].seller;
+    }
+
+    /// @notice Update the price of an unsold property (only seller can update)
+    function updatePropertyPrice(uint _propertyId, uint _newPrice) public {
+        Property storage property = properties[_propertyId];
+        require(property.seller == msg.sender, "Only the seller can update the price");
+        require(!property.isSold, "Cannot update price after sale");
+        require(_newPrice > 0, "New price must be greater than zero");
+
+        property.price = _newPrice;
+    }
+
+    /// @notice Allows contract owner to withdraw accidental ETH sent to contract
+    function withdrawEther() public {
+        require(msg.sender == owner, "Only contract owner can withdraw");
+        payable(owner).transfer(address(this).balance);
+    }
+
 }
